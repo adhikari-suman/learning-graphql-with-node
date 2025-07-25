@@ -5,51 +5,42 @@ import { GraphQLServer } from "graphql-yoga";
 // type definitions (schema)
 const typeDefs = `
     type Query {
+        me: User!
+        post: Post!
+    }
+
+    type User {
         id: ID!
         name: String!
-        age: Int!
-        employed: Boolean!
-        gpa: Float    
-        title: String!
-        price: Float!    
-        releaseYear: Int
-        rating: Float
-        inStock: Boolean!
+        email: String!
+        age: Int        
+    }
+
+    type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
     }
 `;
 
 // Resolvers
 const resolvers = {
   Query: {
-    id() {
-      return "abc123";
+    me() {
+      return {
+        id: "12345",
+        name: "Ariel",
+        email: "ariel@gmail.com",
+      };
     },
-    name() {
-      return "Ariel";
-    },
-    age() {
-      return 18;
-    },
-    employed() {
-      return true;
-    },
-    gpa() {
-      return 3.01;
-    },
-    title() {
-      return "Apple iPhone 14 Pro Max";
-    },
-    price() {
-      return 1099.99;
-    },
-    releaseYear() {
-      return null;
-    },
-    rating() {
-      return null;
-    },
-    inStock() {
-      return true;
+    post() {
+      return {
+        id: "54321",
+        title: "GraphQL Basics",
+        body: "Learning GraphQL is fun!",
+        published: true,
+      };
     },
   },
 };
