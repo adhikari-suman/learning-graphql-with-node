@@ -1,22 +1,56 @@
 import { GraphQLServer } from "graphql-yoga";
 
+// Scalar Types (Single Value): String, Boolean, Int, Float, ID (unique identifiers)
+
 // type definitions (schema)
 const typeDefs = `
     type Query {
-        hello: String!
+        id: ID!
         name: String!
-        location: String!
-        bio: String!
+        age: Int!
+        employed: Boolean!
+        gpa: Float    
+        title: String!
+        price: Float!    
+        releaseYear: Int
+        rating: Float
+        inStock: Boolean!
     }
 `;
 
 // Resolvers
 const resolvers = {
   Query: {
-    hello: () => "Hello world!",
-    name: () => "Ariel",
-    location: () => "Fairfield, IA",
-    bio: () => "Ariel is a software developer in the US of A",
+    id() {
+      return "abc123";
+    },
+    name() {
+      return "Ariel";
+    },
+    age() {
+      return 18;
+    },
+    employed() {
+      return true;
+    },
+    gpa() {
+      return 3.01;
+    },
+    title() {
+      return "Apple iPhone 14 Pro Max";
+    },
+    price() {
+      return 1099.99;
+    },
+    releaseYear() {
+      return null;
+    },
+    rating() {
+      return null;
+    },
+    inStock() {
+      return true;
+    },
   },
 };
 
