@@ -2,14 +2,67 @@ import { GraphQLServer } from "graphql-yoga";
 
 // Scalar Types (Single Value): String, Boolean, Int, Float, ID (unique identifiers)
 
+// Demo user data
+const users = [
+  {
+    id: "1",
+    name: "Ariel",
+    email: "ariel@gmail.com",
+    age: 18,
+  },
+  {
+    id: "2",
+    name: "John",
+    email: "john@gmail.com",
+    age: 25,
+  },
+  {
+    id: "3",
+    name: "Jane",
+    email: "jane@gmail.com",
+  },
+];
+
+const posts = [
+  {
+    id: "1",
+    title: "GraphQL Basics",
+    body: "Learning GraphQL is fun!",
+    published: true,
+  },
+  {
+    id: "2",
+    title: "Advanced GraphQL",
+    body: "Exploring advanced topics in GraphQL.",
+    published: false,
+  },
+  {
+    id: "3",
+    title: "GraphQL vs REST",
+    body: "Comparing GraphQL with REST APIs.",
+    published: true,
+  },
+  {
+    id: "4",
+    title: "GraphQL Subscriptions",
+    body: "Understanding real-time data with GraphQL subscriptions.",
+    published: true,
+  },
+  {
+    id: "5",
+    title: "GraphQL and Apollo",
+    body: "Using Apollo Client with GraphQL.",
+    published: false,
+  },
+];
+
 // type definitions (schema)
 const typeDefs = `
     type Query {
-        add(numbers: [Float!]!): Float!
-        greeting(name:String, position: String): String!
+        users(query: String): [User!]!
+        posts(query:String): [Post!]!
         me: User!
-        post: Post!
-        grades: [Int!]!
+        post: Post!        
     }
 
     type User {
@@ -30,22 +83,26 @@ const typeDefs = `
 // Resolvers
 const resolvers = {
   Query: {
-    grades() {
-      return [99, 80, 93];
-    },
-    add(parent, args, ctx, info) {
-      if (args.numbers.length === 0) {
-        return 0;
+    posts(parent, args, ctx, info) {
+      if (!args.query) {
+        return posts;
       }
 
-      return args.numbers.reduce((sum, current) => sum + current, 0);
+      return posts.filter((posts) => {
+        return (
+          posts.title.toLowerCase().includes(args.query.toLowerCase()) ||
+          posts.body.toLowerCase().includes(args.query.toLowerCase())
+        );
+      });
     },
-    greeting(parent, args, ctx, info) {
-      if (args.name && args.position) {
-        return `Hello ${args.name} You are my favorite ${args.position}`;
+    users(parent, args, ctx, info) {
+      if (!args.query) {
+        return users;
       }
 
-      return "Hello";
+      return users.filter((user) => {
+        return user.name.toLowerCase().includes(args.query.toLowerCase());
+      });
     },
     me() {
       return {
