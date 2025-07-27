@@ -29,30 +29,35 @@ const posts = [
     title: "GraphQL Basics",
     body: "Learning GraphQL is fun!",
     published: true,
+    author: "1",
   },
   {
     id: "2",
     title: "Advanced GraphQL",
     body: "Exploring advanced topics in GraphQL.",
     published: false,
+    author: "2",
   },
   {
     id: "3",
     title: "GraphQL vs REST",
     body: "Comparing GraphQL with REST APIs.",
     published: true,
+    author: "3",
   },
   {
     id: "4",
     title: "GraphQL Subscriptions",
     body: "Understanding real-time data with GraphQL subscriptions.",
     published: true,
+    author: "1",
   },
   {
     id: "5",
     title: "GraphQL and Apollo",
     body: "Using Apollo Client with GraphQL.",
     published: false,
+    author: "3",
   },
 ];
 
@@ -77,6 +82,7 @@ const typeDefs = `
         title: String!
         body: String!
         published: Boolean!
+        author: User!
     }
 `;
 
@@ -118,6 +124,11 @@ const resolvers = {
         body: "Learning GraphQL is fun!",
         published: true,
       };
+    },
+  },
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find((user) => user.id === parent.author);
     },
   },
 };
