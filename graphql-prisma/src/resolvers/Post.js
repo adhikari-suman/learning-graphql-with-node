@@ -1,10 +1,15 @@
 const Post = {
-  author(parent, args, { db }, info) {
-    return db.users.find((user) => user.id === parent.author);
+  async author(parent, args, { prisma }, info) {
+    return prisma.user.findUnique({
+      where: { id: parent.authorId },
+    });
   },
-  comments(parent, args, { db }, info) {
-    return db.comments.filter((comment) => comment.post === parent.id);
+
+  async comments(parent, args, { prisma }, info) {
+    return prisma.comment.findMany({
+      where: { postId: parent.id },
+    });
   },
 };
 
-export { Post as default };
+export default Post;
