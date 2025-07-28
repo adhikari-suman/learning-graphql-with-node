@@ -8,6 +8,7 @@
     "test": "echo \"No tests specified\" && exit 1"
   },
   "dependencies": {
+    "@prisma/client": "^6.12.0",
     "babel-cli": "6.26.0",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "babel-preset-env": "1.7.0",
@@ -15,6 +16,7 @@
     "uuid": "3.3.2"
   },
   "devDependencies": {
-    "nodemon": "1.17.5"
+    "nodemon": "1.17.5",
+    "prisma": "^6.12.0"
   }
 }
