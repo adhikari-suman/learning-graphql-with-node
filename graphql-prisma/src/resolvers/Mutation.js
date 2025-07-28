@@ -1,19 +1,22 @@
 import uuid from "uuid";
 
 const Mutation = {
-  createUser(parent, args, { db }, info) {
-    const emailTaken = db.users.some((user) => user.email === args.data.email);
+  async createUser(parent, args, { prisma }, info) {
+    const emailTaken = await prisma.user.findUnique({
+      where: { email: args.data.email },
+    });
 
     if (emailTaken) {
       throw new Error("Email taken.");
     }
 
-    const user = {
-      id: uuid.v4(),
+    const userData = {
       ...args.data,
     };
 
-    db.users.push(user);
+    const user = await prisma.user.create({
+      data: userData,
+    });
 
     return user;
   },
