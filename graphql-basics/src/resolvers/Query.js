@@ -35,8 +35,8 @@ const Query = {
       published: true,
     };
   },
-  comments() {
-    return comments;
+  comments(parent, args, { db }, info) {
+    return db.comments;
   },
 };
 
