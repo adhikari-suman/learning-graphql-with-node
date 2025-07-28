@@ -1,11 +1,11 @@
 const Subscription = {
   comment: {
-    subscribe(parent, args, { db, pubSub }, info) {
+    async subscribe(parent, args, { prisma, pubSub }, info) {
       const { postId } = args;
 
-      const post = db.posts.find(
-        (post) => post.id === postId && post.published
-      );
+      const post = await prisma.post.findUnique({
+        where: { id: postId, published: true },
+      });
 
       if (!post) {
         throw new Error("Post not found or published.");
