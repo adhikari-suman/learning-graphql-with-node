@@ -20,18 +20,23 @@ const Mutation = {
 
     return user;
   },
-  updateUser(parent, args, { db }, info) {
+  async updateUser(parent, args, { prisma }, info) {
     const { id, data } = args;
-    const user = db.users.find((user) => user.id === id);
+    const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) {
       throw new Error("User not found.");
     }
 
     if (typeof data.email === "string") {
-      const emailTaken = db.users.some(
-        (user) => user.email === data.email && user.id !== id
-      );
+      const emailTaken = await prisma.user.findFirst({
+        where: {
+          email: data.email,
+          NOT: {
+            id: id, // exclude current user id
+          },
+        },
+      });
 
       if (emailTaken) {
         throw new Error("Email taken.");
@@ -40,15 +45,17 @@ const Mutation = {
       user.email = data.email;
     }
 
-    if (typeof data.name === "string") {
-      user.name = data.name;
-    }
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        // Only update fields that are provided in 'data'
+        ...(typeof data.email === "string" && { email: data.email }),
+        ...(typeof data.name === "string" && { name: data.name }),
+        ...(typeof data.age !== "undefined" && { age: data.age }),
+      },
+    });
 
-    if (typeof data.age !== "undefined") {
-      user.age = data.age;
-    }
-
-    return user;
+    return updatedUser;
   },
   deleteUser(parent, args, { db }, info) {
     const userIdx = db.users.findIndex((user) => user.id === args.id);
