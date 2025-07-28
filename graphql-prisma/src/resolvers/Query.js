@@ -53,8 +53,8 @@ const Query = {
       published: true,
     };
   },
-  comments(parent, args, { db }, info) {
-    return db.comments;
+  async comments(parent, args, { prisma }, info) {
+    return prisma.comment.findMany();
   },
 };
 
