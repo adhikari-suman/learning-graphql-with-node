@@ -23,13 +23,19 @@ const Query = {
       },
     });
   },
-  users(parent, args, { db }, info) {
+  async users(parent, args, { prisma }, info) {
     if (!args.query) {
-      return db.users;
+      return prisma.user.findMany();
     }
 
-    return db.users.filter((user) => {
-      return user.name.toLowerCase().includes(args.query.toLowerCase());
+    return prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            name: { contains: args.query, mode: "insensitive" },
+          },
+        ],
+      },
     });
   },
   me() {
