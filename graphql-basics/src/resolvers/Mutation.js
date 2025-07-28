@@ -77,15 +77,19 @@ const Mutation = {
 
     if (post.published) {
       pubSub.publish("post", {
-        post,
+        post: {
+          mutation: "CREATED",
+          data: post,
+        },
       });
     }
 
     return post;
   },
-  updatePost(parent, args, { db }, info) {
+  updatePost(parent, args, { db, pubSub }, info) {
     const { id, data } = args;
     const post = db.posts.find((post) => post.id === id);
+    const originalPost = { ...post };
 
     if (!post) {
       throw new Error("Post not found.");
@@ -101,22 +105,54 @@ const Mutation = {
 
     if (typeof data.published === "boolean") {
       post.published = data.published;
+
+      if (originalPost.published && !post.published) {
+        pubSub.publish("post", {
+          post: {
+            mutation: "DELETED",
+            data: originalPost,
+          },
+        });
+      } else if (!originalPost.published && post.published) {
+        pubSub.publish("post", {
+          post: {
+            mutation: "CREATED",
+            data: post,
+          },
+        });
+      } else if (post.published) {
+        pubSub.publish("post", {
+          post: {
+            mutation: "UPDATED",
+            data: post,
+          },
+        });
+      }
     }
 
     return post;
   },
-  deletePost(parent, args, { db }, info) {
+  deletePost(parent, args, { db, pubSub }, info) {
     const postIdx = db.posts.findIndex((post) => post.id === args.id);
 
     if (postIdx === -1) {
       throw new Error("Post not found.");
     }
 
-    const deletedPosts = db.posts.splice(postIdx, 1);
+    const [deletedPost] = db.posts.splice(postIdx, 1);
 
-    comments = db.comments.filter((comment) => comment.post !== args.id);
+    db.comments = db.comments.filter((comment) => comment.post !== args.id);
 
-    return deletedPosts[0];
+    if (deletedPost.published) {
+      pubSub.publish("post", {
+        post: {
+          mutation: "DELETED",
+          data: deletedPost,
+        },
+      });
+    }
+
+    return deletedPost;
   },
   createComment(parent, args, { db, pubSub }, info) {
     const userExists = db.users.some((user) => user.id === args.data.author);
