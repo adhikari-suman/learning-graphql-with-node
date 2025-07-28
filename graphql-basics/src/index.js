@@ -4,7 +4,7 @@ import uuid from "uuid";
 // Scalar Types (Single Value): String, Boolean, Int, Float, ID (unique identifiers)
 
 // Demo user data
-const users = [
+let users = [
   {
     id: "1",
     name: "Ariel",
@@ -24,7 +24,7 @@ const users = [
   },
 ];
 
-const posts = [
+let posts = [
   {
     id: "1",
     title: "GraphQL Basics",
@@ -62,7 +62,7 @@ const posts = [
   },
 ];
 
-const comments = [
+let comments = [
   {
     id: "1",
     text: "Great post!",
@@ -107,6 +107,7 @@ const typeDefs = `
 
     type Mutation {
       createUser(data: CreateUserInput): User!
+      deleteUser(id: ID!): User!
       createPost(data: CreatePostInput): Post!
       createComment(data: CreateCommentInput): Comment!
     }
@@ -215,6 +216,20 @@ const resolvers = {
       users.push(user);
 
       return user;
+    },
+    deleteUser(parent, args, ctx, info) {
+      const userIdx = users.findIndex((user) => user.id === args.id);
+
+      if (userIdx === -1) {
+        throw new Error("User not found.");
+      }
+
+      const deletedUsers = users.splice(userIdx, 1);
+
+      posts = posts.filter((post) => post.author !== args.id);
+      comments = comments.filter((comment) => comment.author !== args.id);
+
+      return deletedUsers[0];
     },
     createPost(parent, args, ctx, info) {
       const userExists = users.some((user) => user.id === args.data.author);
