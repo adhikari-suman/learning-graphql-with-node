@@ -1,14 +1,26 @@
 const Query = {
-  posts(parent, args, { db }, info) {
+  async posts(parent, args, { prisma }, info) {
     if (!args.query) {
-      return db.posts;
+      return prisma.post.findMany();
     }
 
-    return db.posts.filter((post) => {
-      return (
-        post.title.toLowerCase().includes(args.query.toLowerCase()) ||
-        post.body.toLowerCase().includes(args.query.toLowerCase())
-      );
+    return prisma.post.findMany({
+      where: {
+        OR: [
+          {
+            title: {
+              contains: args.query,
+              mode: "insensitive",
+            },
+          },
+          {
+            body: {
+              contains: args.query,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
     });
   },
   users(parent, args, { db }, info) {
