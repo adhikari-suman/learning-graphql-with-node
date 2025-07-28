@@ -87,6 +87,39 @@ const Mutation = {
 
     return deletedUser;
   },
+  async createPost(parent, args, { pubSub, prisma }, info) {
+    const { title, body, published, author } = args.data;
+
+    const userExists = await prisma.user.findFirst({
+      where: { id: author },
+    });
+
+    if (!userExists) {
+      throw new Error("User not found.");
+    }
+
+    const newPost = await prisma.post.create({
+      data: {
+        title,
+        body,
+        published,
+        author: {
+          connect: { id: author },
+        },
+      },
+    });
+
+    if (newPost.published) {
+      pubSub.publish("post", {
+        post: {
+          mutation: "CREATED",
+          data: newPost,
+        },
+      });
+    }
+
+    return newPost;
+  },
   updatePost(parent, args, { db, pubSub }, info) {
     const { id, data } = args;
     const post = db.posts.find((post) => post.id === id);
