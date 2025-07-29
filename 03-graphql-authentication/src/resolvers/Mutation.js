@@ -309,9 +309,12 @@ const Mutation = {
 
     return deletedComment;
   },
-  async updateComment(parent, args, { prisma, pubSub }, info) {
+  async updateComment(parent, args, { prisma, pubSub, request }, info) {
+    const userId = getUserId(request);
     const { id, data } = args;
-    const comment = await prisma.comment.findUnique({ where: { id: id } });
+    const comment = await prisma.comment.findUnique({
+      where: { id: id, authorId: userId },
+    });
 
     if (!comment) {
       throw new Error("Comment not found.");
