@@ -6,6 +6,7 @@ import Post from "./resolvers/Post.js";
 import Comment from "./resolvers/Comment.js";
 import Subscription from "./resolvers/Subscription.js";
 import { PrismaClient } from "./generated/prisma/client.js";
+
 // Resolvers
 const resolvers = {
   Query,
@@ -21,9 +22,8 @@ const prisma = new PrismaClient();
 const server = new GraphQLServer({
   typeDefs: "./src/schema.graphql",
   resolvers,
-  context: {
-    pubSub,
-    prisma,
+  context(request) {
+    return { pubSub, prisma, request };
   },
 });
 
