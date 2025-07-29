@@ -1,7 +1,35 @@
 import getUserId from "../utils/getUserId.js";
 
 const Query = {
-  async posts(parent, args, { prisma, request }, info) {
+  async myPosts(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
+    const opArgs = {
+      where: {
+        author: { id: userId },
+      },
+    };
+
+    if (args.query) {
+      opArgs.where.OR = [
+        {
+          title: {
+            contains: args.query,
+            mode: "insensitive",
+          },
+        },
+        {
+          body: {
+            contains: args.query,
+            mode: "insensitive",
+          },
+        },
+      ];
+    }
+
+    return prisma.post.findMany(opArgs);
+  },
+  async posts(parent, args, { prisma }, info) {
     const opArgs = {
       where: {
         published: true,
