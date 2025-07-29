@@ -1,7 +1,33 @@
-import bcrypt from "bcryptjs";
+import bcrypt, { hash } from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// TODO: fetch JWT_SECRET from .env
+const JWT_SECRET = "mysecret";
+
 const Mutation = {
+  async login(parent, args, { prisma }, info) {
+    console.log(info);
+    const { email, password } = args.data;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new Error("Invalid username or password.");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isMatch) {
+      throw new Error("Invalid username or password.");
+    }
+
+    const authPayload = {
+      user,
+      token: jwt.sign({ userId: user.id }, JWT_SECRET),
+    };
+
+    return authPayload;
+  },
   async createUser(parent, args, { prisma }, info) {
     const { name, email, age, password } = args.data;
 
@@ -26,9 +52,6 @@ const Mutation = {
     const createdUser = await prisma.user.create({
       data: userData,
     });
-
-    // TODO: fetch JWT_SECRET from .env
-    const JWT_SECRET = "mysecret";
 
     const authPayload = {
       user: createdUser,
