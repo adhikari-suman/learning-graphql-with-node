@@ -96,10 +96,10 @@ const Mutation = {
 
     return updatedUser;
   },
-  async deleteUser(parent, args, { prisma }, info) {
-    const { id } = args;
+  async deleteUser(parent, args, { request, prisma }, info) {
+    const userId = getUserId(request);
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
       throw new Error("User not found.");
@@ -108,20 +108,20 @@ const Mutation = {
     // Delete related comments
     await prisma.comment.deleteMany({
       where: {
-        authorId: id,
+        authorId: userId,
       },
     });
 
     // Delete related posts
     await prisma.post.deleteMany({
       where: {
-        authorId: id,
+        authorId: userId,
       },
     });
 
     // Delete user
     const deletedUser = await prisma.user.delete({
-      where: { id },
+      where: { id: userId },
     });
 
     return deletedUser;
