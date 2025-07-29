@@ -120,51 +120,52 @@ const Mutation = {
 
     return newPost;
   },
-  updatePost(parent, args, { db, pubSub }, info) {
+  async updatePost(parent, args, { prisma, pubSub }, info) {
     const { id, data } = args;
-    const post = db.posts.find((post) => post.id === id);
-    const originalPost = { ...post };
+    const post = await prisma.post.findUnique({ where: { id: id } });
 
     if (!post) {
       throw new Error("Post not found.");
     }
 
-    if (typeof data.title === "string") {
-      post.title = data.title;
-    }
+    const originalPost = { ...post };
 
-    if (typeof data.body === "string") {
-      post.body = data.body;
-    }
+    const updatedPost = await prisma.post.update({
+      where: { id: id },
+      data: {
+        title: typeof data.title === "string" ? data.title : undefined,
+        body: typeof data.body === "string" ? data.body : undefined,
+        published:
+          typeof data.published === "boolean" ? data.published : undefined,
+      },
+    });
 
     if (typeof data.published === "boolean") {
-      post.published = data.published;
-
-      if (originalPost.published && !post.published) {
+      if (originalPost.published && !updatedPost.published) {
         pubSub.publish("post", {
           post: {
             mutation: "DELETED",
             data: originalPost,
           },
         });
-      } else if (!originalPost.published && post.published) {
+      } else if (!originalPost.published && updatedPost.published) {
         pubSub.publish("post", {
           post: {
             mutation: "CREATED",
-            data: post,
+            data: updatedPost,
           },
         });
-      } else if (post.published) {
+      } else if (updatedPost.published) {
         pubSub.publish("post", {
           post: {
             mutation: "UPDATED",
-            data: post,
+            data: updatedPost,
           },
         });
       }
     }
 
-    return post;
+    return updatedPost;
   },
   async deletePost(parent, args, { prisma, pubSub }, info) {
     const post = await prisma.post.findUnique({ where: { id: args.id } });
