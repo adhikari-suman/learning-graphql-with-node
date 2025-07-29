@@ -1,5 +1,6 @@
 import bcrypt, { hash } from "bcryptjs";
 import jwt from "jsonwebtoken";
+import getUserId from "../utils/getUserId.js";
 
 // TODO: fetch JWT_SECRET from .env
 const JWT_SECRET = "mysecret";
@@ -126,11 +127,13 @@ const Mutation = {
 
     return deletedUser;
   },
-  async createPost(parent, args, { pubSub, prisma }, info) {
-    const { title, body, published, author } = args.data;
+  async createPost(parent, args, { pubSub, prisma, request }, info) {
+    const userId = getUserId(request);
+
+    const { title, body, published } = args.data;
 
     const userExists = await prisma.user.findFirst({
-      where: { id: author },
+      where: { id: userId },
     });
 
     if (!userExists) {
@@ -143,7 +146,7 @@ const Mutation = {
         body,
         published,
         author: {
-          connect: { id: author },
+          connect: { id: userId },
         },
       },
     });
