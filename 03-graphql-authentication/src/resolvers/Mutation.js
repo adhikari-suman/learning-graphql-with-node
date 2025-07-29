@@ -60,8 +60,9 @@ const Mutation = {
 
     return authPayload;
   },
-  async updateUser(parent, args, { prisma }, info) {
-    const { id, data } = args;
+  async updateUser(parent, args, { request, prisma }, info) {
+    const id = getUserId(request);
+    const { data } = args;
     const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) {
@@ -81,8 +82,6 @@ const Mutation = {
       if (emailTaken) {
         throw new Error("Email taken.");
       }
-
-      user.email = data.email;
     }
 
     const updatedUser = await prisma.user.update({
