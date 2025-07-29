@@ -1,3 +1,5 @@
+import getUserId from "../utils/getUserId.js";
+
 const Query = {
   async posts(parent, args, { prisma }, info) {
     if (!args.query) {
@@ -45,13 +47,30 @@ const Query = {
       email: "ariel@gmail.com",
     };
   },
-  post() {
-    return {
-      id: "54321",
-      title: "GraphQL Basics",
-      body: "Learning GraphQL is fun!",
-      published: true,
-    };
+  async post(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request, false);
+
+    const post = await prisma.post.findFirst({
+      where: {
+        id: args.id,
+        OR: [
+          {
+            published: true,
+          },
+          {
+            author: {
+              id: userId,
+            },
+          },
+        ],
+      },
+    });
+
+    if (!post) {
+      throw new Error("Post not found.");
+    }
+
+    return post;
   },
   async comments(parent, args, { prisma }, info) {
     return prisma.comment.findMany();
