@@ -208,11 +208,15 @@ const Mutation = {
 
     return updatedPost;
   },
-  async deletePost(parent, args, { prisma, pubSub }, info) {
-    const post = await prisma.post.findUnique({ where: { id: args.id } });
+  async deletePost(parent, args, { prisma, pubSub, request }, info) {
+    const userId = getUserId(request);
+
+    const post = await prisma.post.findFirst({
+      where: { id: args.id, authorId: userId },
+    });
 
     if (!post) {
-      throw new Error("Post not found.");
+      throw new Error("Unable to delete post.");
     }
 
     await prisma.comment.deleteMany({ where: { postId: args.id } });
