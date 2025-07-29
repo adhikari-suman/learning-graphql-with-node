@@ -1,24 +1,32 @@
-import uuid from "uuid";
+import bcrypt from "bcryptjs";
 
 const Mutation = {
   async createUser(parent, args, { prisma }, info) {
+    const { name, email, age, password } = args.data;
+
     const emailTaken = await prisma.user.findUnique({
-      where: { email: args.data.email },
+      where: { email: email },
     });
 
     if (emailTaken) {
       throw new Error("Email taken.");
     }
 
-    const userData = {
-      ...args.data,
-    };
+    if (password.length < 8) {
+      throw new Error("Password must be 8 characters or longer.");
+    }
 
-    const user = await prisma.user.create({
+    // TODO: salt rounds needs to be put in .env
+    const SALT_ROUNDS = 12;
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const userData = { email, name, age, passwordHash: hashedPassword };
+
+    const createdUser = await prisma.user.create({
       data: userData,
     });
 
-    return user;
+    return createdUser;
   },
   async updateUser(parent, args, { prisma }, info) {
     const { id, data } = args;
