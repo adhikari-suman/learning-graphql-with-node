@@ -254,26 +254,29 @@ const Mutation = {
 
     return deletedComment;
   },
-  updateComment(parent, args, { db, pubSub }, info) {
+  async updateComment(parent, args, { prisma, pubSub }, info) {
     const { id, data } = args;
-    const comment = db.comments.find((comment) => comment.id === id);
+    const comment = await prisma.comment.findUnique({ where: { id: id } });
 
     if (!comment) {
       throw new Error("Comment not found.");
     }
 
-    if (typeof data.text === "string") {
-      comment.text = data.text;
-    }
-
-    pubSub.publish(`comment ${comment.post}`, {
-      comment: {
-        mutation: "UPDATED",
-        data: comment,
+    const updatedComment = await prisma.comment.update({
+      where: { id: id },
+      data: {
+        text: typeof data.text === "string" ? data.text : undefined,
       },
     });
 
-    return comment;
+    pubSub.publish(`comment ${updatedComment.postId}`, {
+      comment: {
+        mutation: "UPDATED",
+        data: updatedComment,
+      },
+    });
+
+    return updatedComment;
   },
 };
 
