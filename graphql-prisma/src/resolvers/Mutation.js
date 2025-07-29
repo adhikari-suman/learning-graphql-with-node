@@ -234,18 +234,18 @@ const Mutation = {
 
     return savedComment;
   },
-  deleteComment(parent, args, { db, pubSub }, info) {
-    const commentIdx = db.comments.findIndex(
-      (comment) => comment.id === args.id
-    );
+  async deleteComment(parent, args, { prisma, pubSub }, info) {
+    const comment = await prisma.comment.findUnique({ where: { id: args.id } });
 
-    if (commentIdx === -1) {
+    if (!comment) {
       throw new Error("Comment not found.");
     }
 
-    const [deletedComment] = db.comments.splice(commentIdx, 1);
+    const deletedComment = await prisma.comment.delete({
+      where: { id: args.id },
+    });
 
-    pubSub.publish(`comment ${deletedComment.post}`, {
+    pubSub.publish(`comment ${deletedComment.postId}`, {
       comment: {
         mutation: "DELETED",
         data: deletedComment,
