@@ -188,36 +188,51 @@ const Mutation = {
 
     return deletedPost;
   },
-  createComment(parent, args, { db, pubSub }, info) {
-    const userExists = db.users.some((user) => user.id === args.data.author);
+  async createComment(parent, args, { prisma, pubSub }, info) {
+    const { text, post, author } = args.data;
+    const userExists = await prisma.user.findUnique({
+      where: { id: author },
+    });
 
     if (!userExists) {
       throw new Error("User not found.");
     }
 
-    const postExists = db.posts.some(
-      (post) => post.id === args.data.post && post.published
-    );
+    const postExists = await prisma.post.findUnique({
+      where: {
+        id: post,
+        published: true,
+      },
+    });
 
     if (!postExists) {
       throw new Error("Post not found or not published.");
     }
 
-    const comment = {
-      id: uuid.v4(),
-      ...args.data,
-    };
-
-    db.comments.push(comment);
+    const savedComment = await prisma.comment.create({
+      data: {
+        text,
+        author: {
+          connect: {
+            id: author,
+          },
+        },
+        post: {
+          connect: {
+            id: post,
+          },
+        },
+      },
+    });
 
     pubSub.publish(`comment ${args.data.post}`, {
       comment: {
         mutation: "CREATED",
-        data: comment,
+        data: savedComment,
       },
     });
 
-    return comment;
+    return savedComment;
   },
   deleteComment(parent, args, { db, pubSub }, info) {
     const commentIdx = db.comments.findIndex(
