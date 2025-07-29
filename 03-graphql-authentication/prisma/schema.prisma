@@ -25,6 +25,8 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
   Comment      Comment[]
+
+  @@map("users")
 }
 
 model Post {
@@ -38,6 +40,8 @@ model Post {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   Comment   Comment[]
+
+    @@map("posts")
 }
 
 model Comment {
@@ -50,4 +54,6 @@ model Comment {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  @@map("comments")
 }
