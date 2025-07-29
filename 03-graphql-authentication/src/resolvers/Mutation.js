@@ -6,7 +6,6 @@ const JWT_SECRET = "mysecret";
 
 const Mutation = {
   async login(parent, args, { prisma }, info) {
-    console.log(info);
     const { email, password } = args.data;
 
     const user = await prisma.user.findUnique({ where: { email } });
