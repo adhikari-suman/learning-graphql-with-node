@@ -1,29 +1,31 @@
 import getUserId from "../utils/getUserId.js";
 
 const Query = {
-  async posts(parent, args, { prisma }, info) {
-    if (!args.query) {
-      return prisma.post.findMany();
+  async posts(parent, args, { prisma, request }, info) {
+    const opArgs = {
+      where: {
+        published: true,
+      },
+    };
+
+    if (args.query) {
+      opArgs.where.OR = [
+        {
+          title: {
+            contains: args.query,
+            mode: "insensitive",
+          },
+        },
+        {
+          body: {
+            contains: args.query,
+            mode: "insensitive",
+          },
+        },
+      ];
     }
 
-    return prisma.post.findMany({
-      where: {
-        OR: [
-          {
-            title: {
-              contains: args.query,
-              mode: "insensitive",
-            },
-          },
-          {
-            body: {
-              contains: args.query,
-              mode: "insensitive",
-            },
-          },
-        ],
-      },
-    });
+    return prisma.post.findMany(opArgs);
   },
   async users(parent, args, { prisma }, info) {
     if (!args.query) {
