@@ -40,12 +40,24 @@ const Query = {
       },
     });
   },
-  me() {
-    return {
-      id: "12345",
-      name: "Ariel",
-      email: "ariel@gmail.com",
-    };
+  async me(parent, args, { request, prisma }, info) {
+    const userId = getUserId(request);
+
+    console.log(userId);
+
+    const user = await prisma.user.findFirst({
+      where: { id: userId },
+      include: {
+        posts: true,
+        comments: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    return user;
   },
   async post(parent, args, { prisma, request }, info) {
     const userId = getUserId(request, false);

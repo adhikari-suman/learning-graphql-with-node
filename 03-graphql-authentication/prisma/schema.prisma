@@ -24,7 +24,7 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
-  Comment      Comment[]
+  comments     Comment[]
 
   @@map("users")
 }
@@ -39,9 +39,9 @@ model Post {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  Comment   Comment[]
+  comment   Comment[]
 
-    @@map("posts")
+  @@map("posts")
 }
 
 model Comment {
