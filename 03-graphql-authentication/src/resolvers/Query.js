@@ -43,8 +43,6 @@ const Query = {
   async me(parent, args, { request, prisma }, info) {
     const userId = getUserId(request);
 
-    console.log(userId);
-
     const user = await prisma.user.findFirst({
       where: { id: userId },
       include: {
