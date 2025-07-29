@@ -161,12 +161,16 @@ const Mutation = {
 
     return newPost;
   },
-  async updatePost(parent, args, { prisma, pubSub }, info) {
+  async updatePost(parent, args, { prisma, pubSub, request }, info) {
+    const userId = getUserId(request);
+
     const { id, data } = args;
-    const post = await prisma.post.findUnique({ where: { id: id } });
+    const post = await prisma.post.findUnique({
+      where: { id: id, authorId: userId },
+    });
 
     if (!post) {
-      throw new Error("Post not found.");
+      throw new Error("Unable to update post.");
     }
 
     const originalPost = { ...post };
