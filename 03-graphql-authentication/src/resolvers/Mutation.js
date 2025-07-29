@@ -238,10 +238,12 @@ const Mutation = {
 
     return deletedPost;
   },
-  async createComment(parent, args, { prisma, pubSub }, info) {
-    const { text, post, author } = args.data;
+  async createComment(parent, args, { prisma, pubSub, request }, info) {
+    const userId = getUserId(request);
+
+    const { text, post } = args.data;
     const userExists = await prisma.user.findUnique({
-      where: { id: author },
+      where: { id: userId },
     });
 
     if (!userExists) {
@@ -264,7 +266,7 @@ const Mutation = {
         text,
         author: {
           connect: {
-            id: author,
+            id: userId,
           },
         },
         post: {
