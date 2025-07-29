@@ -286,8 +286,11 @@ const Mutation = {
 
     return savedComment;
   },
-  async deleteComment(parent, args, { prisma, pubSub }, info) {
-    const comment = await prisma.comment.findUnique({ where: { id: args.id } });
+  async deleteComment(parent, args, { prisma, pubSub, request }, info) {
+    const userId = getUserId(request);
+    const comment = await prisma.comment.findUnique({
+      where: { id: args.id, authorId: userId },
+    });
 
     if (!comment) {
       throw new Error("Comment not found.");
