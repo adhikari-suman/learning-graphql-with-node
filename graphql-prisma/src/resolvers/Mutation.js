@@ -166,16 +166,16 @@ const Mutation = {
 
     return post;
   },
-  deletePost(parent, args, { db, pubSub }, info) {
-    const postIdx = db.posts.findIndex((post) => post.id === args.id);
+  async deletePost(parent, args, { prisma, pubSub }, info) {
+    const post = await prisma.post.findUnique({ where: { id: args.id } });
 
-    if (postIdx === -1) {
+    if (!post) {
       throw new Error("Post not found.");
     }
 
-    const [deletedPost] = db.posts.splice(postIdx, 1);
+    await prisma.comment.deleteMany({ where: { postId: args.id } });
 
-    db.comments = db.comments.filter((comment) => comment.post !== args.id);
+    const deletedPost = await prisma.post.delete({ where: { id: args.id } });
 
     if (deletedPost.published) {
       pubSub.publish("post", {
