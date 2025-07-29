@@ -15,15 +15,16 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  age       Int?
-  posts     Post[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  Comment   Comment[]
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  age          Int?
+  posts        Post[]
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  Comment      Comment[]
 }
 
 model Post {
