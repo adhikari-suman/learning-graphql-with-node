@@ -1,3 +1,5 @@
+import getUserId from "../utils/getUserId.js";
+
 const Subscription = {
   comment: {
     async subscribe(parent, args, { prisma, pubSub }, info) {
@@ -18,6 +20,14 @@ const Subscription = {
   post: {
     subscribe(parent, args, { pubSub }, info) {
       return pubSub.asyncIterator("post");
+    },
+  },
+
+  myPost: {
+    subscribe(parent, args, { pubSub, request }, info) {
+      const userId = getUserId(request);
+
+      return pubSub.asyncIterator(`myPost ${userId}`);
     },
   },
 };
