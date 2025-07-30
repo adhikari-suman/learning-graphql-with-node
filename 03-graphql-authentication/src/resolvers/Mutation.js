@@ -165,7 +165,7 @@ const Mutation = {
     const userId = getUserId(request);
 
     const { id, data } = args;
-    const post = await prisma.post.findUnique({
+    const post = await prisma.post.findFirst({
       where: { id: id, authorId: userId },
     });
 
@@ -193,6 +193,8 @@ const Mutation = {
             data: originalPost,
           },
         });
+
+        await prisma.comment.deleteMany({ where: { postId: id } });
       } else if (!originalPost.published && updatedPost.published) {
         pubSub.publish("post", {
           post: {
