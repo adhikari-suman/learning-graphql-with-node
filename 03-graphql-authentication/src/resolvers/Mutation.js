@@ -193,6 +193,12 @@ const Mutation = {
             data: originalPost,
           },
         });
+        pubSub.publish(`myPost ${userId}`, {
+          myPost: {
+            mutation: "DELETED",
+            data: originalPost,
+          },
+        });
 
         await prisma.comment.deleteMany({ where: { postId: id } });
       } else if (!originalPost.published && updatedPost.published) {
@@ -202,9 +208,21 @@ const Mutation = {
             data: updatedPost,
           },
         });
+        pubSub.publish(`myPost ${userId}`, {
+          myPost: {
+            mutation: "CREATED",
+            data: updatedPost,
+          },
+        });
       } else if (updatedPost.published) {
         pubSub.publish("post", {
           post: {
+            mutation: "UPDATED",
+            data: updatedPost,
+          },
+        });
+        pubSub.publish(`myPost ${userId}`, {
+          myPost: {
             mutation: "UPDATED",
             data: updatedPost,
           },
