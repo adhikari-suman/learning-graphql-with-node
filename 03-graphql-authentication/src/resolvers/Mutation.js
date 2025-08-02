@@ -2,6 +2,7 @@ import bcrypt, { hash } from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getUserId from "../utils/getUserId.js";
 import generateToken from "../utils/generateToken.js";
+import hashPassword from "../utils/hashPassword.js";
 
 const Mutation = {
   async login(parent, args, { prisma }, info) {
@@ -37,13 +38,7 @@ const Mutation = {
       throw new Error("Email taken.");
     }
 
-    if (password.length < 8) {
-      throw new Error("Password must be 8 characters or longer.");
-    }
-
-    // TODO: salt rounds needs to be put in .env
-    const SALT_ROUNDS = 12;
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const hashedPassword = await hashPassword(password);
 
     const userData = { email, name, age, passwordHash: hashedPassword };
 
@@ -89,6 +84,9 @@ const Mutation = {
         ...(typeof data.email === "string" && { email: data.email }),
         ...(typeof data.name === "string" && { name: data.name }),
         ...(typeof data.age !== "undefined" && { age: data.age }),
+        ...(typeof data.password !== "undefined" && {
+          passwordHash: await hashPassword(data.password),
+        }),
       },
     });
 
