@@ -30,14 +30,22 @@ const Query = {
     return prisma.post.findMany(opArgs);
   },
   async posts(parent, args, { prisma }, info) {
-    const { query, first, skip } = args;
+    const { query, first, skip, after } = args;
     const opArgs = {
       where: {
         published: true,
       },
+      orderBy: { id: "asc" },
       ...(typeof first === "number" && { take: first }),
       ...(typeof skip === "number" && { skip: skip }),
     };
+
+    if (after) {
+      opArgs.cursor = {
+        id: after,
+      };
+      opArgs.skip = 1;
+    }
 
     if (query) {
       opArgs.where.OR = [
@@ -59,22 +67,29 @@ const Query = {
     return prisma.post.findMany(opArgs);
   },
   async users(parent, args, { prisma }, info) {
-    const { query, first, skip } = args;
+    const { query, first, skip, after } = args;
 
     const opArgs = {
+      where: {},
+      orderBy: { id: "asc" },
       ...(typeof first === "number" && { take: first }),
       ...(typeof skip === "number" && { skip: skip }),
     };
 
-    if (!query) {
-      return prisma.user.findMany(opArgs);
+    if (after) {
+      opArgs.cursor = {
+        id: after,
+      };
+      opArgs.skip = 1;
     }
 
-    opArgs.where.OR = [
-      {
-        name: { contains: query, mode: "insensitive" },
-      },
-    ];
+    if (query) {
+      opArgs.where.OR = [
+        {
+          name: { contains: query, mode: "insensitive" },
+        },
+      ];
+    }
 
     return prisma.user.findMany(opArgs);
   },
