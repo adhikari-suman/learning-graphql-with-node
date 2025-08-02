@@ -2,25 +2,36 @@ import getUserId from "../utils/getUserId.js";
 
 const Query = {
   async myPosts(parent, args, { prisma, request }, info) {
+    const { query, first, skip, after } = args;
     const userId = getUserId(request);
 
     const opArgs = {
       where: {
         author: { id: userId },
       },
+      orderBy: { id: "asc" },
+      ...(typeof first === "number" && { take: first }),
+      ...(typeof skip === "number" && { skip: skip }),
     };
 
-    if (args.query) {
+    if (after) {
+      opArgs.cursor = {
+        id: after,
+      };
+      opArgs.skip = 1;
+    }
+
+    if (query) {
       opArgs.where.OR = [
         {
           title: {
-            contains: args.query,
+            contains: query,
             mode: "insensitive",
           },
         },
         {
           body: {
-            contains: args.query,
+            contains: query,
             mode: "insensitive",
           },
         },
@@ -136,7 +147,20 @@ const Query = {
     return post;
   },
   async comments(parent, args, { prisma }, info) {
-    return prisma.comment.findMany();
+    const { first, skip, after } = args;
+
+    const opArgs = {
+      orderBy: { id: "asc" },
+      ...(typeof first === "number" && { take: first }),
+      ...(typeof skip === "number" && { skip: skip }),
+    };
+
+    if (after) {
+      opArgs.cursor = { id: after };
+      opArgs.skip = 1;
+    }
+
+    return prisma.comment.findMany(opArgs);
   },
 };
 
