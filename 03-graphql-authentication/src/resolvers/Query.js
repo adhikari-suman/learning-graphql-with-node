@@ -30,23 +30,26 @@ const Query = {
     return prisma.post.findMany(opArgs);
   },
   async posts(parent, args, { prisma }, info) {
+    const { query, first, skip } = args;
     const opArgs = {
       where: {
         published: true,
       },
+      ...(typeof first === "number" && { take: first }),
+      ...(typeof skip === "number" && { skip: skip }),
     };
 
-    if (args.query) {
+    if (query) {
       opArgs.where.OR = [
         {
           title: {
-            contains: args.query,
+            contains: query,
             mode: "insensitive",
           },
         },
         {
           body: {
-            contains: args.query,
+            contains: query,
             mode: "insensitive",
           },
         },
@@ -57,7 +60,7 @@ const Query = {
   },
   async users(parent, args, { prisma }, info) {
     if (!args.query) {
-      return prisma.user.findMany();
+      return prisma.user.findMany({});
     }
 
     return prisma.user.findMany({
