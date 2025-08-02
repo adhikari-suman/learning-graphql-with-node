@@ -1,9 +1,7 @@
 import bcrypt, { hash } from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getUserId from "../utils/getUserId.js";
-
-// TODO: fetch JWT_SECRET from .env
-const JWT_SECRET = "mysecret";
+import generateToken from "../utils/generateToken.js";
 
 const Mutation = {
   async login(parent, args, { prisma }, info) {
@@ -23,7 +21,7 @@ const Mutation = {
 
     const authPayload = {
       user,
-      token: jwt.sign({ userId: user.id }, JWT_SECRET),
+      token: generateToken(user.id),
     };
 
     return authPayload;
@@ -55,7 +53,7 @@ const Mutation = {
 
     const authPayload = {
       user: createdUser,
-      token: jwt.sign({ userId: createdUser.id }, JWT_SECRET),
+      token: generateToken(createdUser.id),
     };
 
     return authPayload;
