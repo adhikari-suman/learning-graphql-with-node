@@ -1,45 +1,12 @@
 import "cross-fetch/polyfill";
 import ApolloBoost, { gql } from "apollo-boost";
 import { PrismaClient } from "@prisma/client";
-import hashPassword from "../src/utils/hashPassword.js";
+import seedDatabase from "./utils/seedDatabase.js";
 
 const client = new ApolloBoost({ uri: "http://localhost:4000" });
 const prisma = new PrismaClient();
 
-beforeEach(async () => {
-  await prisma.post.deleteMany();
-  await prisma.user.deleteMany();
-
-  const userJen = await prisma.user.create({
-    data: {
-      name: "Jen",
-      email: "jen@example.com",
-      passwordHash: await hashPassword("Red098!@#$"),
-    },
-  });
-
-  await prisma.post.create({
-    data: {
-      title: "GraphQL is fun",
-      body: "Did you ever imagine it to be this fun!",
-      author: {
-        connect: { id: userJen.id },
-      },
-      published: true,
-    },
-  });
-
-  await prisma.post.create({
-    data: {
-      title: "My Draft post",
-      body: "",
-      author: {
-        connect: { id: userJen.id },
-      },
-      published: false,
-    },
-  });
-});
+beforeEach(seedDatabase);
 
 test("should create a new user", async () => {
   // arrange
