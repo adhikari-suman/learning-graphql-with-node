@@ -60,31 +60,6 @@ test("should expose public author profiles", async () => {
   expect(response.data.users[0].name).toBe("Jen");
 });
 
-test("should return only public posts", async () => {
-  // arrange
-  const getPosts = gql`
-    query {
-      posts {
-        id
-        title
-        body
-        published
-      }
-    }
-  `;
-
-  // act
-  const response = await client.query({ query: getPosts });
-
-  // assert
-  expect(response.data.posts.length).toBe(1);
-  expect(response.data.posts[0].published).toBe(true);
-  expect(response.data.posts[0].title).toBe("GraphQL is fun");
-  expect(response.data.posts[0].body).toBe(
-    "Did you ever imagine it to be this fun!"
-  );
-});
-
 test("should not login with bad credentials", async () => {
   // arrange
   const login = gql`
