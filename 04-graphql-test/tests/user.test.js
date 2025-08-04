@@ -1,56 +1,39 @@
-import { getFirstName, isValidPassword } from "../src/utils/user.js";
+import "cross-fetch/polyfill";
+import ApolloBoost, { gql } from "apollo-boost";
+import { PrismaClient } from "@prisma/client";
+import { existedOperationTypeMessage } from "graphql/validation/rules/UniqueOperationTypes";
 
-test("should return first name when given full name", () => {
+const client = new ApolloBoost({ uri: "http://localhost:4000" });
+const prisma = new PrismaClient();
+
+test("should create a new user", async () => {
   // arrange
-  const fullName = "Suman Adhikari";
+  const createUser = gql`
+    mutation {
+      createUser(
+        data: {
+          name: "Ariel"
+          email: "ariel@gmail.com"
+          password: "MyPass$123"
+        }
+      ) {
+        token
+        user {
+          id
+        }
+      }
+    }
+  `;
 
   // act
-  const firstName = getFirstName(fullName);
+  const response = await client.mutate({
+    mutation: createUser,
+  });
 
   // assert
-  expect(firstName).toBe("Suman");
-});
+  const user = await prisma.user.findUnique({
+    where: { id: response.data.createUser.user.id },
+  });
 
-test("should return first name when given first name", () => {
-  // arrange
-  const fullName = "Suman";
-
-  // act
-  const firstName = getFirstName(fullName);
-
-  // assert
-  expect(firstName).toBe("Suman");
-});
-
-test("should reject password shorter than 8 characters", () => {
-  // arrange
-  const password = "Suman";
-
-  // act
-  const isValid = isValidPassword(password);
-
-  // assert
-  expect(isValid).toBe(false);
-});
-
-test("should reject password that contains the word password", () => {
-  // arrange
-  const password = "password1234";
-
-  // act
-  const isValid = isValidPassword(password);
-
-  // assert
-  expect(isValid).toBe(false);
-});
-
-test("should correctly validate a password", () => {
-  // arrange
-  const password = "Testing@123";
-
-  // act
-  const isValid = isValidPassword(password);
-
-  // assert
-  expect(isValid).toBe(true);
+  expect(user).not.toBeNull();
 });
