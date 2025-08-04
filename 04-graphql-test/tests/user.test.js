@@ -72,3 +72,23 @@ test("should create a new user", async () => {
 
   expect(user).not.toBeNull();
 });
+
+test("should expose public author profiles", async () => {
+  // arrange
+  const getUsers = gql`
+    query {
+      users {
+        id
+        name
+        email
+      }
+    }
+  `;
+  // act
+  const response = await client.query({ query: getUsers });
+
+  // assert
+  expect(response.data.users.length).toBe(1);
+  expect(response.data.users[0].email).toBe(null);
+  expect(response.data.users[0].name).toBe("Jen");
+});
