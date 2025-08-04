@@ -1,6 +1,22 @@
 import "cross-fetch/polyfill";
 import { PrismaClient } from "@prisma/client";
 import hashPassword from "../../src/utils/hashPassword.js";
+import jwt from "jsonwebtoken";
+import generateToken from "../../src/utils/generateToken.js";
+
+const userOne = {
+  input: {
+    name: "Jen",
+    email: "jen@example.com",
+    passwordHash: undefined, // password set on beforeAll() below
+  },
+  user: undefined,
+  jwt: undefined,
+};
+
+beforeAll(async () => {
+  userOne.input.passwordHash = await hashPassword("Red098!@#$");
+});
 
 const prisma = new PrismaClient();
 
@@ -8,20 +24,19 @@ const seedDatabase = async () => {
   await prisma.post.deleteMany();
   await prisma.user.deleteMany();
 
-  const userJen = await prisma.user.create({
-    data: {
-      name: "Jen",
-      email: "jen@example.com",
-      passwordHash: await hashPassword("Red098!@#$"),
-    },
+  userOne.user = await prisma.user.create({
+    data: userOne.input,
   });
+  userOne.jwt = generateToken(userOne.user.id);
+
+  console.log(userOne);
 
   await prisma.post.create({
     data: {
       title: "GraphQL is fun",
       body: "Did you ever imagine it to be this fun!",
       author: {
-        connect: { id: userJen.id },
+        connect: { id: userOne.user.id },
       },
       published: true,
     },
@@ -32,7 +47,7 @@ const seedDatabase = async () => {
       title: "My Draft post",
       body: "",
       author: {
-        connect: { id: userJen.id },
+        connect: { id: userOne.user.id },
       },
       published: false,
     },
