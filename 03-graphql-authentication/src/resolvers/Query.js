@@ -2,14 +2,21 @@ import getUserId from "../utils/getUserId.js";
 
 const Query = {
   async myPosts(parent, args, { prisma, request }, info) {
-    const { query, first, skip, after } = args;
+    const { query, first, skip, after, orderBy } = args;
     const userId = getUserId(request);
+
+    if (orderBy) {
+      const keys = Object.keys(orderBy);
+      if (keys.length !== 1) {
+        throw new Error("Please provide exactly one key for ordering.");
+      }
+    }
 
     const opArgs = {
       where: {
         author: { id: userId },
       },
-      orderBy: { id: "asc" },
+      orderBy: orderBy ?? { id: "asc" },
       ...(typeof first === "number" && { take: first }),
       ...(typeof skip === "number" && { skip: skip }),
     };
@@ -41,12 +48,20 @@ const Query = {
     return prisma.post.findMany(opArgs);
   },
   async posts(parent, args, { prisma }, info) {
-    const { query, first, skip, after } = args;
+    const { query, first, skip, after, orderBy } = args;
+
+    if (orderBy) {
+      const keys = Object.keys(orderBy);
+      if (keys.length !== 1) {
+        throw new Error("Please provide exactly one key for ordering.");
+      }
+    }
+
     const opArgs = {
       where: {
         published: true,
       },
-      orderBy: { id: "asc" },
+      orderBy: orderBy ?? { id: "asc" },
       ...(typeof first === "number" && { take: first }),
       ...(typeof skip === "number" && { skip: skip }),
     };
