@@ -1,7 +1,7 @@
 import "cross-fetch/polyfill";
 import { gql } from "apollo-boost";
 import { PrismaClient } from "@prisma/client";
-import seedDatabase, { userOne } from "./utils/seedDatabase.js";
+import seedDatabase, { userOne, postOne } from "./utils/seedDatabase.js";
 import getClient from "./utils/getClient.js";
 
 const client = getClient();
@@ -60,4 +60,35 @@ test("should fetch user posts", async () => {
   expect(data.myPosts.length).toBe(2);
   expect(publishedPosts.length).toBe(1);
   expect(unpublishedPosts.length).toBe(1);
+});
+
+test("Should be able to update own post", async () => {
+  // arrange
+  const client = getClient(userOne.jwt);
+  const updatePost = gql`
+    mutation {
+      updatePost(id: "${postOne.post.id}"
+      data: {
+        published: false
+      }){
+        id
+        title
+        body
+        published
+      }
+    }
+  `;
+
+  // act
+  const { data } = await client.mutate({ mutation: updatePost });
+
+  // assert
+  expect(data.updatePost.id).toBe(postOne.post.id);
+  expect(data.updatePost.published).toBe(false);
+
+  const post = await prisma.post.findFirst({
+    where: { id: postOne.post.id, published: false },
+  });
+
+  expect(post).not.toBe(null);
 });

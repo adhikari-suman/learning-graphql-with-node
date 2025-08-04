@@ -14,6 +14,15 @@ const userOne = {
   jwt: undefined,
 };
 
+const postOne = {
+  input: {
+    title: "GraphQL is fun",
+    body: "Did you ever imagine it to be this fun!",
+    published: true,
+  },
+  post: undefined,
+};
+
 beforeAll(async () => {
   userOne.input.passwordHash = await hashPassword("Red098!@#$");
 });
@@ -29,17 +38,17 @@ const seedDatabase = async () => {
   });
   userOne.jwt = generateToken(userOne.user.id);
 
-  await prisma.post.create({
+  // create post one
+  postOne.post = await prisma.post.create({
     data: {
-      title: "GraphQL is fun",
-      body: "Did you ever imagine it to be this fun!",
+      ...postOne.input,
       author: {
         connect: { id: userOne.user.id },
       },
-      published: true,
     },
   });
 
+  // create post two
   await prisma.post.create({
     data: {
       title: "My Draft post",
@@ -52,4 +61,4 @@ const seedDatabase = async () => {
   });
 };
 
-export { seedDatabase as default, userOne };
+export { seedDatabase as default, userOne, postOne };
