@@ -92,3 +92,32 @@ test("Should be able to update own post", async () => {
 
   expect(post).not.toBe(null);
 });
+
+test("should create post for user successfully", async () => {
+  // arrange
+  const client = getClient(userOne.jwt);
+  const createPost = gql`
+    mutation {
+      createPost(
+        data: {
+          title: "My own post"
+          body: "It's a great post"
+          published: true
+        }
+      ) {
+        id
+        title
+        body
+        published
+      }
+    }
+  `;
+
+  // act
+  const { data } = await client.mutate({ mutation: createPost });
+
+  // assert
+  expect(data.createPost.title).toBe("My own post");
+  expect(data.createPost.body).toBe("It's a great post");
+  expect(data.createPost.published).toBe(true);
+});
