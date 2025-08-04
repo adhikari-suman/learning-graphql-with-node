@@ -1,5 +1,11 @@
 type Query {
-  users(query: String, first: Int, skip: Int, after: String): [User!]!
+  users(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: UserOrderByInput
+  ): [User!]!
   posts(query: String, first: Int, skip: Int, after: String): [Post!]!
   myPosts(query: String, first: Int, skip: Int, after: String): [Post!]!
   me: User!
@@ -71,6 +77,17 @@ input UpdateCommentInput {
   text: String
 }
 
+input UserOrderByInput {
+  id: SortOrder
+  name: SortOrder
+  email: SortOrder
+  age: SortOrder
+  posts: SortOrder
+  comments: SortOrder
+  updatedAt: SortOrder
+  createdAt: SortOrder
+}
+
 type User {
   id: ID!
   name: String!
@@ -106,6 +123,11 @@ enum MutationType {
   CREATED
   UPDATED
   DELETED
+}
+
+enum SortOrder {
+  asc
+  desc
 }
 
 type PostSubscriptionPayload {
