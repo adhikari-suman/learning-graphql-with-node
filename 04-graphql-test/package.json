@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
     "dev": "dotenv -e .env.test -- nodemon src/index.js --ext js,graphql",
@@ -17,16 +16,16 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
-    "globalSetup": "./tests/jest/globalSetup.js",
-    "globalTeardown": "./tests/jest/globalTeardown.js",
-    "modulePathIgnorePatterns": [
-      "generated/prisma"
-    ]
+    "globalSetup": "./tests/jest/globalSetup.cjs",
+    "globalTeardown": "./tests/jest/globalTeardown.cjs"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "apollo-boost": "0.1.14",
     "bcryptjs": "^3.0.2",
+    "cross-fetch": "2.2.2",
     "dotenv": "^17.2.1",
+    "graphql": "14.7.0",
     "graphql-yoga": "1.16.7",
     "jsonwebtoken": "^9.0.2"
   },
