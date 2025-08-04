@@ -8,8 +8,8 @@
     "dev": "dotenv -e .env.test -- nodemon src/index.js --ext js,graphql",
     "db:push:test": "dotenv -e .env.test -- prisma db push",
     "generate": "prisma generate",
-    "test": "dotenv -e .env.test -- jest",
-    "test:watch": "dotenv -e .env.test -- jest --watch"
+    "test": "dotenv -e .env.test -- jest --runInBand",
+    "test:watch": "dotenv -e .env.test -- jest --watch --runInBand"
   },
   "jest": {
     "testEnvironment": "node",
