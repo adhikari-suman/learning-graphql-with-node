@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "dev": "dotenv -e .env.test -- nodemon src/index.js --ext js,graphql",
     "db:push:test": "dotenv -e .env.test -- prisma db push",
-    "test": "echo \"No tests specified\" && exit 1"
+    "test": "jest --watch"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
