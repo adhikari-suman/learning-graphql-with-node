@@ -29,8 +29,6 @@ const seedDatabase = async () => {
   });
   userOne.jwt = generateToken(userOne.user.id);
 
-  console.log(userOne);
-
   await prisma.post.create({
     data: {
       title: "GraphQL is fun",
@@ -54,4 +52,4 @@ const seedDatabase = async () => {
   });
 };
 
-export { seedDatabase as default };
+export { seedDatabase as default, userOne };
