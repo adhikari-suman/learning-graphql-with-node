@@ -2,6 +2,6 @@
 .env.*
 !.env.example
 dist
-
+.cache
 node_modules
 /src/generated/prisma
