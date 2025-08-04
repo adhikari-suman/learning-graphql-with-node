@@ -117,3 +117,38 @@ test("should return only public posts", async () => {
     "Did you ever imagine it to be this fun!"
   );
 });
+
+test("should not login with bad credentials", async () => {
+  // arrange
+  const login = gql`
+    mutation {
+      login(data: { email: "john@gxample.com", password: "asdadkjsadlskdj" }) {
+        token
+      }
+    }
+  `;
+
+  // act
+  // assert
+  await expect(client.mutate({ mutation: login })).rejects.toThrow();
+});
+
+test("should fail signup with short password", async () => {
+  // arrange
+  const createUser = gql`
+    mutation {
+      createUser(
+        data: { name: "John", email: "john@gmail.com", password: "MyPass" }
+      ) {
+        token
+        user {
+          id
+        }
+      }
+    }
+  `;
+
+  // act
+  // assert
+  await expect(client.mutate({ mutation: createUser })).rejects.toThrow();
+});
