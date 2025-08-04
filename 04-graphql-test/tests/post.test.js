@@ -1,7 +1,7 @@
 import "cross-fetch/polyfill";
 import { gql } from "apollo-boost";
 import { PrismaClient } from "@prisma/client";
-import seedDatabase from "./utils/seedDatabase.js";
+import seedDatabase, { userOne } from "./utils/seedDatabase.js";
 import getClient from "./utils/getClient.js";
 
 const client = getClient();
@@ -32,4 +32,32 @@ test("should return only public posts", async () => {
   expect(response.data.posts[0].body).toBe(
     "Did you ever imagine it to be this fun!"
   );
+});
+
+test("should fetch user posts", async () => {
+  // arrange
+  const client = getClient(userOne.jwt);
+  const getUserPosts = gql`
+    query {
+      myPosts {
+        id
+        title
+        body
+        published
+      }
+    }
+  `;
+
+  // act
+  const { data } = await client.query({ query: getUserPosts });
+
+  const publishedPosts = data.myPosts.filter((post) => post.published === true);
+  const unpublishedPosts = data.myPosts.filter(
+    (post) => post.published === false
+  );
+
+  // assert
+  expect(data.myPosts.length).toBe(2);
+  expect(publishedPosts.length).toBe(1);
+  expect(unpublishedPosts.length).toBe(1);
 });
