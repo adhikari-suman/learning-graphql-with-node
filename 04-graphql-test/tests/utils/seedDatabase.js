@@ -128,6 +128,7 @@ const seedDatabase = async () => {
 export {
   seedDatabase as default,
   userOne,
+  userTwo,
   postOne,
   postTwo,
   commentOne,
