@@ -140,9 +140,6 @@ test("should delete my post successfully", async () => {
     }
   `;
 
-  console.log(postTwo);
-  console.log(userOne);
-
   // act
   const { data } = await client.mutate({ mutation: deletePost });
 
