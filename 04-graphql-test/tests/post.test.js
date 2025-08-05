@@ -1,5 +1,5 @@
 import "cross-fetch/polyfill";
-import { gql } from "apollo-boost";
+import { from, gql } from "apollo-boost";
 import { PrismaClient } from "@prisma/client";
 import seedDatabase, {
   userOne,
@@ -7,6 +7,13 @@ import seedDatabase, {
   postTwo,
 } from "./utils/seedDatabase.js";
 import getClient from "./utils/getClient.js";
+import {
+  createPost,
+  updatePost,
+  deletePost,
+  getUserPosts,
+  getPosts,
+} from "./utils/operations.js";
 
 const client = getClient();
 const prisma = new PrismaClient();
@@ -15,16 +22,6 @@ beforeEach(seedDatabase);
 
 test("should return only public posts", async () => {
   // arrange
-  const getPosts = gql`
-    query {
-      posts {
-        id
-        title
-        body
-        published
-      }
-    }
-  `;
 
   // act
   const response = await client.query({ query: getPosts });
@@ -41,16 +38,6 @@ test("should return only public posts", async () => {
 test("should fetch user posts", async () => {
   // arrange
   const client = getClient(userOne.jwt);
-  const getUserPosts = gql`
-    query {
-      myPosts {
-        id
-        title
-        body
-        published
-      }
-    }
-  `;
 
   // act
   const { data } = await client.query({ query: getUserPosts });
@@ -69,22 +56,12 @@ test("should fetch user posts", async () => {
 test("Should be able to update own post", async () => {
   // arrange
   const client = getClient(userOne.jwt);
-  const updatePost = gql`
-    mutation {
-      updatePost(id: "${postOne.post.id}"
-      data: {
-        published: false
-      }){
-        id
-        title
-        body
-        published
-      }
-    }
-  `;
+  const variables = {
+    postId: postOne.post.id,
+  };
 
   // act
-  const { data } = await client.mutate({ mutation: updatePost });
+  const { data } = await client.mutate({ mutation: updatePost, variables });
 
   // assert
   expect(data.updatePost.id).toBe(postOne.post.id);
@@ -100,25 +77,16 @@ test("Should be able to update own post", async () => {
 test("should create post for user successfully", async () => {
   // arrange
   const client = getClient(userOne.jwt);
-  const createPost = gql`
-    mutation {
-      createPost(
-        data: {
-          title: "My own post"
-          body: "It's a great post"
-          published: true
-        }
-      ) {
-        id
-        title
-        body
-        published
-      }
-    }
-  `;
+  const variables = {
+    data: {
+      title: "My own post",
+      body: "It's a great post",
+      published: true,
+    },
+  };
 
   // act
-  const { data } = await client.mutate({ mutation: createPost });
+  const { data } = await client.mutate({ mutation: createPost, variables });
 
   // assert
   expect(data.createPost.title).toBe("My own post");
@@ -129,19 +97,12 @@ test("should create post for user successfully", async () => {
 test("should delete my post successfully", async () => {
   // arrange
   const client = getClient(userOne.jwt);
-  const deletePost = gql`
-    mutation {
-      deletePost(id: "${postTwo.post.id}"){
-        id
-        title
-        body
-        published
-      }
-    }
-  `;
+  const variables = {
+    postId: postTwo.post.id,
+  };
 
   // act
-  const { data } = await client.mutate({ mutation: deletePost });
+  const { data } = await client.mutate({ mutation: deletePost, variables });
 
   // assert
   expect(data.deletePost.id).toBe(postTwo.post.id);
