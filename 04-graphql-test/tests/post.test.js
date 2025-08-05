@@ -1,7 +1,11 @@
 import "cross-fetch/polyfill";
 import { gql } from "apollo-boost";
 import { PrismaClient } from "@prisma/client";
-import seedDatabase, { userOne, postOne } from "./utils/seedDatabase.js";
+import seedDatabase, {
+  userOne,
+  postOne,
+  postTwo,
+} from "./utils/seedDatabase.js";
 import getClient from "./utils/getClient.js";
 
 const client = getClient();
@@ -120,4 +124,35 @@ test("should create post for user successfully", async () => {
   expect(data.createPost.title).toBe("My own post");
   expect(data.createPost.body).toBe("It's a great post");
   expect(data.createPost.published).toBe(true);
+});
+
+test("should delete my post successfully", async () => {
+  // arrange
+  const client = getClient(userOne.jwt);
+  const deletePost = gql`
+    mutation {
+      deletePost(id: "${postTwo.post.id}"){
+        id
+        title
+        body
+        published
+      }
+    }
+  `;
+
+  console.log(postTwo);
+  console.log(userOne);
+
+  // act
+  const { data } = await client.mutate({ mutation: deletePost });
+
+  // assert
+  expect(data.deletePost.id).toBe(postTwo.post.id);
+  expect(data.deletePost.title).toBe(postTwo.post.title);
+  expect(data.deletePost.body).toBe(postTwo.post.body);
+  expect(data.deletePost.published).toBe(postTwo.post.published);
+
+  await expect(
+    prisma.post.findFirstOrThrow({ where: { id: postTwo.post.id } })
+  ).rejects.toThrow();
 });

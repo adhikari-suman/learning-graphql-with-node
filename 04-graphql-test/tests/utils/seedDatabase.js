@@ -23,6 +23,15 @@ const postOne = {
   post: undefined,
 };
 
+const postTwo = {
+  input: {
+    title: "My Draft post",
+    body: "",
+    published: false,
+  },
+  post: undefined,
+};
+
 beforeAll(async () => {
   userOne.input.passwordHash = await hashPassword("Red098!@#$");
 });
@@ -49,16 +58,14 @@ const seedDatabase = async () => {
   });
 
   // create post two
-  await prisma.post.create({
+  postTwo.post = await prisma.post.create({
     data: {
-      title: "My Draft post",
-      body: "",
+      ...postTwo.input,
       author: {
         connect: { id: userOne.user.id },
       },
-      published: false,
     },
   });
 };
 
-export { seedDatabase as default, userOne, postOne };
+export { seedDatabase as default, userOne, postOne, postTwo };
