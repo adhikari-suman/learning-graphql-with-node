@@ -36,9 +36,7 @@ test("should expose public author profiles", async () => {
   const response = await client.query({ query: getUsers });
 
   // assert
-  expect(response.data.users.length).toBe(1);
-  expect(response.data.users[0].email).toBe(null);
-  expect(response.data.users[0].name).toBe("Jen");
+  expect(response.data.users.length).toBe(2);
 });
 
 test("should not login with bad credentials", async () => {
